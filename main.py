@@ -15,9 +15,11 @@ import meta
 import layout
 from layout_chart import ChartWindow
 import analyze_screen
+import subprocess
 
 START_FLAG = False
 global df
+
 
 class Sensor:
     __slots__ = ['name', 't_prev', 'v_prev']
@@ -166,8 +168,8 @@ def stop_handler():
     # app.spinBox_3.setValue(0)
 
     additivePath = app.textEditFolder.toPlainText()
-    level = app.textEditSath.toPlainText()
-    repetition = app.textEditTekrar.toPlainText()
+    level = app.textEditLevel.toPlainText()
+    repetition = app.textEditRepeat.toPlainText()
 
     finalAddress = additivePath + '/' + level + '/' + repetition + '/' + repetition + '.csv'
     finalAddress = os.path.normpath(finalAddress)
@@ -282,9 +284,11 @@ def testingDataframe():
     df = create_dataframe(json_data)
     visualize_dataframe(df)
 
+
 def create_dataframe(json_data):
     df = pd.read_json(json_data)
     return df
+
 
 def visualize_dataframe(df):
     df.plot(ax=ax)
@@ -299,8 +303,6 @@ def clearDataFrameAndCanvas():
     ax.legend(handles=meta.patches, loc='upper left')
     canvas.draw()
 
-    chart_window = ChartWindow()
-    chart_window.show()
 
 if __name__ == '__main__':
 
@@ -331,7 +333,7 @@ if __name__ == '__main__':
     app.startButton.clicked.connect(start_handler)
     app.stopButton.clicked.connect(stop_handler)
     app.exportButton.clicked.connect(exportData)
-    app.clearButton.clicked.connect(clearDataFrameAndCanvas)
+    #app.clearButton.clicked.connect(clearDataFrameAndCanvas)
     app.time1Button.clicked.connect(start_time1_handler)
     app.time2Button.clicked.connect(start_time2_handler)
     app.time3Button.clicked.connect(start_time3_handler)
@@ -341,5 +343,7 @@ if __name__ == '__main__':
     fig = canvas.figure
     ax = fig.subplots()
     ax.xaxis.set_major_locator(plt.MaxNLocator(meta.X_UNITS))
+
+    add_log(logs_queue, f'welcome back...\n')
 
     qapp.exec()
