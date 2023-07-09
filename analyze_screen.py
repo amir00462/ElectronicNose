@@ -1,5 +1,7 @@
 import os
 import sys
+
+from PyQt5.QtGui import QIcon
 from matplotlib.backends.qt_compat import QtWidgets, QtCore, QtGui
 from PyQt5.QtWidgets import QApplication, QWidget, QTableWidget, QTableWidgetItem, QPushButton, QHeaderView, QHBoxLayout, QVBoxLayout
 import lda_screen
@@ -17,6 +19,9 @@ class AnalyzeApp(QtWidgets.QMainWindow):
         self.centralwidget = QtWidgets.QWidget()
         self.setCentralWidget(self.centralwidget)
 
+        icon = QIcon("icon.ico")
+        self.setWindowIcon(icon)
+
         self.loadDataButton = QtWidgets.QPushButton(self.centralwidget)
         self.loadDataButton.setGeometry(QtCore.QRect(20, 700, 1010, 40))
         self.loadDataButton.setFont(buttonFont)
@@ -29,11 +34,11 @@ class AnalyzeApp(QtWidgets.QMainWindow):
         self.svmButton.setAutoDefault(False)
         self.svmButton.clicked.connect(self.onSvmClicked)
 
-        self.svrButton = QtWidgets.QPushButton(self.centralwidget)
-        self.svrButton.setGeometry(QtCore.QRect(525, 740, 504, 40))
-        self.svrButton.setFont(buttonFont)
-        self.svrButton.setAutoDefault(False)
-        self.svrButton.clicked.connect(self.onLdaClicked)
+        self.ldaButton = QtWidgets.QPushButton(self.centralwidget)
+        self.ldaButton.setGeometry(QtCore.QRect(525, 740, 504, 40))
+        self.ldaButton.setFont(buttonFont)
+        self.ldaButton.setAutoDefault(False)
+        self.ldaButton.clicked.connect(self.onLdaClicked)
 
         self.table = QtWidgets.QTableWidget()
         central_widget = QtWidgets.QWidget()
@@ -42,7 +47,7 @@ class AnalyzeApp(QtWidgets.QMainWindow):
         layout.addWidget(self.table)
         layout.addWidget(self.loadDataButton)
         layout.addWidget(self.svmButton)
-        layout.addWidget(self.svrButton)
+        layout.addWidget(self.ldaButton)
         self.setCentralWidget(central_widget)
 
         self.retranslateUi()
@@ -91,7 +96,8 @@ class AnalyzeApp(QtWidgets.QMainWindow):
                     rowData.append("")
             data.append(rowData)
 
-        return pd.DataFrame(data)
+        headers = self.df.columns.tolist()
+        return pd.DataFrame(data , columns=headers)
 
     def onSvmClicked(self):
         self.svmScreen = svm_screen.SvmAnalyze(self.getDataFrameFromTable())
@@ -101,9 +107,15 @@ class AnalyzeApp(QtWidgets.QMainWindow):
         self.ldaScreen = lda_screen.LdaAnalyze(self.getDataFrameFromTable())
         self.ldaScreen.show()
 
+    def onRemoveButtonClicked(self):
+        pass
+
+    def onAddButtonClicked(self):
+        pass
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("AnalyzeWindow", "Analyze Screen"))
         self.loadDataButton.setText(_translate("AnalyzeWindow", "Load Data"))
         self.svmButton.setText(_translate("AnalyzeWindow", "SVM"))
-        self.svrButton.setText(_translate("AnalyzeWindow", "LDA"))
+        self.ldaButton.setText(_translate("AnalyzeWindow", "LDA"))

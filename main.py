@@ -1,6 +1,7 @@
 from matplotlib.backends.qt_compat import QtWidgets
 from queue import Queue
 import datetime
+import dialog_export
 import matplotlib.pyplot as plt
 import glob
 import paho.mqtt.client as mqtt
@@ -14,6 +15,9 @@ import threading
 import meta
 import layout
 from layout_chart import ChartWindow
+from matplotlib.backends.qt_compat import QtWidgets
+from PyQt5.QtWidgets import QDialog
+
 import analyze_screen
 import subprocess
 
@@ -147,7 +151,7 @@ def enqueue(queue, clause):
 
 def add_log(queue, clause):
     enqueue(queue, clause)
-    app.logSection.setText('\n'.join(list(logs_queue.queue)[::-1]))
+    app.logSection.setText('\n'.join(list(logs_queue.queue)))
 
 
 def show_diagram(x):
@@ -222,44 +226,9 @@ def createConfigFile():
 
 
 def exportData():
-    DATA_FOLDER = app.textEditFolder.toPlainText()
-
-    time1 = 100
-    with open(DATA_FOLDER + "/config.txt") as f:
-        for line in f:
-            if line.__contains__('Index'):
-                time1 = int(line.split('=')[1])
-
-    SAMPLE_START_INDEX = int(time1 - (time1 / 10))
-    SKIP_ROW_INDEX = 70
-
-    # creating csv file  ->
-    sensors = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6']
-    header = [*sensors, 'Temperature', 'Humidity', 'Class']
-    df = pd.DataFrame(columns=header)
-
-    data_paths = glob.glob(DATA_FOLDER + '/*/*/*.csv', recursive=True)
-
-    for file_path in data_paths:
-        raw_data = pd.read_csv(file_path)
-        xmax = raw_data[SKIP_ROW_INDEX:].max(0)  # Max values of each column
-        process_dict = {}
-
-        for sensor in sensors:
-            sample_start = raw_data[sensor][SAMPLE_START_INDEX]
-            if sample_start == 0:
-                process_dict.setdefault(sensor, 0)
-            else:
-                # Normalizing sensors data
-                process_dict.setdefault(sensor, ((xmax[sensor] - sample_start) / sample_start).round(4))
-
-        process_dict.setdefault('Temperature', xmax['Temperature'])
-        process_dict.setdefault('Humidity', xmax['Humidity'])
-        process_dict.setdefault('Class', file_path.split('\\')[-3])
-        df = pd.concat([df, pd.DataFrame(process_dict, index=[0])], ignore_index=True)
-
-    df.to_excel(DATA_FOLDER + '\processed_data.xlsx')
-    add_log(logs_queue, f'exported in processed_data.xlsx and config saved in config.txt')
+    dialog = dialog_export.ExportDialog(folder=app.textEditFolder.toPlainText())
+    if dialog.exec_() == QDialog.Accepted:
+        add_log(logs_queue, f'all data exported in processed_data.xlsx')
 
 
 def generate_json_data(num_records):
@@ -311,7 +280,7 @@ if __name__ == '__main__':
     mqtt_client.username_pw_set(meta.MQTT_USER, meta.MQTT_PASSWORD)
     mqtt_client.on_connect = on_connect
     mqtt_client.on_message = on_message
-    mqtt_client.connect(meta.MQTT_ADDRESS, meta.MQTT_PORT)
+    resultCode = mqtt_client.connect(meta.MQTT_ADDRESS, meta.MQTT_PORT)
     mqtt_client.loop_start()
 
     pumps = {}
@@ -333,7 +302,7 @@ if __name__ == '__main__':
     app.startButton.clicked.connect(start_handler)
     app.stopButton.clicked.connect(stop_handler)
     app.exportButton.clicked.connect(exportData)
-    #app.clearButton.clicked.connect(clearDataFrameAndCanvas)
+    # app.clearButton.clicked.connect(clearDataFrameAndCanvas)
     app.time1Button.clicked.connect(start_time1_handler)
     app.time2Button.clicked.connect(start_time2_handler)
     app.time3Button.clicked.connect(start_time3_handler)
@@ -344,6 +313,14 @@ if __name__ == '__main__':
     ax = fig.subplots()
     ax.xaxis.set_major_locator(plt.MaxNLocator(meta.X_UNITS))
 
-    add_log(logs_queue, f'welcome back...\n')
+    if resultCode == 0:
+        add_log(logs_queue, f'Mqtt broker is ready to use')
+
+    outputHostedNetwork = subprocess.run(["netsh", "wlan", "show", "hostednetwork"], capture_output=True, text=True)
+    if str(outputHostedNetwork).__contains__("mhshse") and str(outputHostedNetwork).__contains__(
+            "Mode                   : Allowed"):
+        add_log(logs_queue, f'hotspot \'mhshse\' created. enable it using MyPublicWifi.exe\n')
+    else:
+        add_log(logs_queue, f'hotspot \'mhshse\' not found. See hotspot.txt for help\n')
 
     qapp.exec()

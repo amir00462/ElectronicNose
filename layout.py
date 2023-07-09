@@ -55,6 +55,7 @@ class ApplicationWindow(QtWidgets.QMainWindow):
 
         self.logSection = QtWidgets.QTextBrowser(self.centralwidget)
         self.logSection.setGeometry(QtCore.QRect(40, 685, 1030, 160))
+        self.logSection.setFont(logFont)
 
         self.spinBox = QtWidgets.QSpinBox(self.layoutWidget)
         self.spinBox.setFont(spinFont)
