@@ -9,6 +9,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.backends.qt_compat import QtWidgets, QtCore, QtGui
 from matplotlib.figure import Figure
 import analyze_screen
+import predict_screen
 from fonts import *
 
 
@@ -48,10 +49,16 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.stopButton.setAutoDefault(False)
 
         self.analyzeButton = QtWidgets.QPushButton(self.centralwidget)
-        self.analyzeButton.setGeometry(QtCore.QRect(40, 900, 1030, 40))
+        self.analyzeButton.setGeometry(QtCore.QRect(40, 900, 514, 40))
         self.analyzeButton.setFont(buttonFont)
         self.analyzeButton.setAutoDefault(False)
         self.analyzeButton.clicked.connect(self.openAnalyzeScreen)
+
+        self.predictButton = QtWidgets.QPushButton(self.centralwidget)
+        self.predictButton.setGeometry(QtCore.QRect(554, 900, 512, 40))
+        self.predictButton.setFont(buttonFont)
+        self.predictButton.setAutoDefault(False)
+        self.predictButton.clicked.connect(self.openPredictScreen)
 
         self.logSection = QtWidgets.QTextBrowser(self.centralwidget)
         self.logSection.setGeometry(QtCore.QRect(40, 685, 1030, 160))
@@ -146,6 +153,10 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.analyzeScreen = analyze_screen.AnalyzeApp()
         self.analyzeScreen.show()
 
+    def openPredictScreen(self):
+        self.predictScreen = predict_screen.PredictScreen()
+        self.predictScreen.show()
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
 
@@ -165,3 +176,4 @@ class ApplicationWindow(QtWidgets.QMainWindow):
         self.repeatLabel.setText(_translate("MainWindow", "Repetition:"))
         self.clearButton.setText(_translate("MainWindow", " Clear Canvas"))
         self.analyzeButton.setText(_translate("MainWindow", "Analyze Collected Data"))
+        self.predictButton.setText(_translate("MainWindow", "Predict Test Data"))

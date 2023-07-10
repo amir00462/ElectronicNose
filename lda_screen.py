@@ -137,6 +137,8 @@ class LdaAnalyze(QtWidgets.QMainWindow):
 
         # Save the model using joblib and test the loaded model.
         self.add_log(self.logs_queue, "Using Lda with your config...")
+        # feature_names = str(self.textEditPrediction.toPlainText()).split(',')
+        # self.X_train_pca.columns = feature_names
         if solver == 'svd':
             lda = LinearDiscriminantAnalysis(solver=solver, shrinkage=None, priors=None, n_components=1)
         else:

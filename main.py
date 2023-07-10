@@ -319,8 +319,10 @@ if __name__ == '__main__':
     outputHostedNetwork = subprocess.run(["netsh", "wlan", "show", "hostednetwork"], capture_output=True, text=True)
     if str(outputHostedNetwork).__contains__("mhshse") and str(outputHostedNetwork).__contains__(
             "Mode                   : Allowed"):
-        add_log(logs_queue, f'hotspot \'mhshse\' created. enable it using MyPublicWifi.exe\n')
+        add_log(logs_queue, f'hotspot \'mhshse\' created. enable it using MyPublicWifi.exe')
     else:
-        add_log(logs_queue, f'hotspot \'mhshse\' not found. See hotspot.txt for help\n')
+        add_log(logs_queue, f'hotspot \'mhshse\' not found. See hotspot.txt for help')
+
+    add_log(logs_queue, "Important = when browse address in this app, your path should not contains whiteSpace\n")
 
     qapp.exec()

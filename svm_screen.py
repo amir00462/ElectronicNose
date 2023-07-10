@@ -117,7 +117,8 @@ class SvmAnalyze(QtWidgets.QMainWindow):
 
         # Tunable 80-20 percent data split for train-test
         test_size = 0.2
-        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(X, Y, test_size=test_size,random_state=42)
+        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(X, Y, test_size=test_size,
+                                                                                random_state=42)
         self.add_log(self.logs_queue, "\nWe are using 80-20 percent data split for train-test...")
 
         self.add_log(self.logs_queue, "\nGrid Search using SVC:")
@@ -143,13 +144,17 @@ class SvmAnalyze(QtWidgets.QMainWindow):
                     self.add_log(self.logs_queue, f'Kernel: {kernel}, Gamma: {gamma}, C: {C}, Accuracy: {accuracy}')
 
         self.add_log(self.logs_queue, "\nGridSearch finished, now choose your config and then tap analyze")
+
     def svmAlgorithm(self):
         kernel = str(self.textEditKernel.toPlainText())
         gamma = float(str(self.textEditGamma.toPlainText()))
         c = float(str(self.textEditCs.toPlainText()))
 
         self.add_log(self.logs_queue, "\n\n\nUsing SVC classifier with your config...\n")
+        feature_names = str(self.textEditPrediction.toPlainText()).split(',')
+        # self.X_train.columns = feature_names
         svclassifier = SVC(kernel=kernel, degree=3, gamma=gamma, C=c, decision_function_shape='ovo', probability=True)
+        # svclassifier.feature_names = feature_names
 
         self.add_log(self.logs_queue, "Training data...\n")
         svclassifier.fit(self.X_train, self.Y_train)
@@ -180,9 +185,11 @@ class SvmAnalyze(QtWidgets.QMainWindow):
             queue.get()
 
         queue.put(clause)
+
     def add_log(self, queue, clause):
         self.enqueue(queue, clause)
         self.logSvm.setText('\n'.join(list(self.logs_queue.queue)))
+
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("SVM", "SVM Analyze"))
