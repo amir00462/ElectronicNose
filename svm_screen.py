@@ -15,6 +15,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from joblib import dump, load
 import plotter_screen
+from matplotlib.figure import Figure
+import plotter_screen
 
 
 class SvmAnalyze(QtWidgets.QMainWindow):
@@ -104,6 +106,10 @@ class SvmAnalyze(QtWidgets.QMainWindow):
         self.retranslateUi()
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    def plotResult(self):
+        # i do not know how to plot it
+        pass
+
     def gridSearchTap(self):
         # self.add_log(self.logs_queue, Y)
         X = self.data[str(self.textEditPrediction.toPlainText()).split(',')].values
@@ -111,8 +117,7 @@ class SvmAnalyze(QtWidgets.QMainWindow):
 
         # Tunable 80-20 percent data split for train-test
         test_size = 0.2
-        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(X, Y, test_size=test_size,
-                                                                                random_state=42)
+        self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(X, Y, test_size=test_size,random_state=42)
         self.add_log(self.logs_queue, "\nWe are using 80-20 percent data split for train-test...")
 
         self.add_log(self.logs_queue, "\nGrid Search using SVC:")
@@ -138,7 +143,6 @@ class SvmAnalyze(QtWidgets.QMainWindow):
                     self.add_log(self.logs_queue, f'Kernel: {kernel}, Gamma: {gamma}, C: {C}, Accuracy: {accuracy}')
 
         self.add_log(self.logs_queue, "\nGridSearch finished, now choose your config and then tap analyze")
-
     def svmAlgorithm(self):
         kernel = str(self.textEditKernel.toPlainText())
         gamma = float(str(self.textEditGamma.toPlainText()))
@@ -167,6 +171,7 @@ class SvmAnalyze(QtWidgets.QMainWindow):
         accuracy = accuracy_score(self.Y_test, y_pred)
         self.add_log(self.logs_queue, f'Accuracy: {accuracy}\n')
 
+        self.plotResult()
         # self.plot_window = plotter_screen.PlotterScreen(self.X_train, self.Y_train , loaded_model)
         # self.plot_window.show()
 
@@ -175,11 +180,9 @@ class SvmAnalyze(QtWidgets.QMainWindow):
             queue.get()
 
         queue.put(clause)
-
     def add_log(self, queue, clause):
         self.enqueue(queue, clause)
         self.logSvm.setText('\n'.join(list(self.logs_queue.queue)))
-
     def retranslateUi(self):
         _translate = QtCore.QCoreApplication.translate
         self.setWindowTitle(_translate("SVM", "SVM Analyze"))
